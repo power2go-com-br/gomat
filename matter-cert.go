@@ -10,7 +10,7 @@ import (
 	"math/big"
 	"strconv"
 
-	"github.com/tom-code/gomat/mattertlv"
+	"github.com/power2go-com-br/gomat/mattertlv"
 )
 
 type dsaSignature struct {

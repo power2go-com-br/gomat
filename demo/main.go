@@ -11,11 +11,11 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"github.com/tom-code/gomat"
-	"github.com/tom-code/gomat/discover"
-	"github.com/tom-code/gomat/mattertlv"
-	"github.com/tom-code/gomat/onboarding_payload"
-	"github.com/tom-code/gomat/symbols"
+	"github.com/power2go-com-br/gomat"
+	"github.com/power2go-com-br/gomat/discover"
+	"github.com/power2go-com-br/gomat/mattertlv"
+	"github.com/power2go-com-br/gomat/onboarding_payload"
+	"github.com/power2go-com-br/gomat/symbols"
 )
 
 func filter_devices(devices []discover.DiscoveredDevice, qr onboarding_payload.QrContent) []discover.DiscoveredDevice {

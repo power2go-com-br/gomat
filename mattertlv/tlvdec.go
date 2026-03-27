@@ -64,7 +64,7 @@ func (i TlvItem) GetBool() bool {
 }
 func (i TlvItem) Dump(pad int) {
 	pads := strings.Repeat("-", pad)
-	fmt.Printf(pads)
+	fmt.Print(pads)
 	fmt.Printf("tag:%3d type:0x%02x itype:", i.Tag, i.matterType)
 	switch i.Type {
 	case TypeNull:
@@ -118,7 +118,7 @@ func (i TlvItem) DumpWithDict(pad int, path string, dictionary map[string]string
 	path_me := fmt.Sprintf("%s.%d", path, i.Tag)
 	pads := strings.Repeat(" ", pad)
 	//fmt.Printf("path %s\n", path_me)
-	fmt.Printf(pads)
+	fmt.Print(pads)
 	name, ok := dictionary[path_me]
 	if !ok {
 		name = fmt.Sprintf("%d", i.Tag)

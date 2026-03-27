@@ -1,9 +1,9 @@
 # gomat
 Simple matter protocol library
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/tom-code/gomat.svg)](https://pkg.go.dev/github.com/tom-code/gomat)
-![go build](https://github.com/tom-code/gomat/actions/workflows/go.yml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/tom-code/gomat)](https://goreportcard.com/report/github.com/tom-code/gomat)
+[![Go Reference](https://pkg.go.dev/badge/github.com/power2go-com-br/gomat.svg)](https://pkg.go.dev/github.com/power2go-com-br/gomat)
+![go build](https://github.com/power2go-com-br/gomat/actions/workflows/go.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/power2go-com-br/gomat)](https://goreportcard.com/report/github.com/power2go-com-br/gomat)
 
 ### goal of project
 The goal is to create golang library and supporting tools to access matter devices.
@@ -80,7 +80,7 @@ package main
 import (
   "net"
 
-  "github.com/tom-code/gomat"
+  "github.com/power2go-com-br/gomat"
 )
 
 
@@ -107,7 +107,7 @@ package main
 import (
   "net"
 
-  "github.com/tom-code/gomat"
+  "github.com/power2go-com-br/gomat"
 )
 
 
@@ -156,8 +156,8 @@ import (
   "fmt"
   "strings"
 
-  "github.com/tom-code/gomat"
-  "github.com/tom-code/gomat/discover"
+  "github.com/power2go-com-br/gomat"
+  "github.com/power2go-com-br/gomat/discover"
 )
 
 
@@ -191,7 +191,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/tom-code/gomat/onboarding_payload"
+	"github.com/power2go-com-br/gomat/onboarding_payload"
 )
 
 
@@ -216,8 +216,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/tom-code/gomat"
-	"github.com/tom-code/gomat/mattertlv"
+	"github.com/power2go-com-br/gomat"
+	"github.com/power2go-com-br/gomat/mattertlv"
 )
 
 

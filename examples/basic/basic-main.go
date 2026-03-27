@@ -12,9 +12,9 @@ import (
 	"net"
 	"os"
 
-	"github.com/tom-code/gomat"
-	"github.com/tom-code/gomat/mattertlv"
-	"github.com/tom-code/gomat/symbols"
+	"github.com/power2go-com-br/gomat"
+	"github.com/power2go-com-br/gomat/mattertlv"
+	"github.com/power2go-com-br/gomat/symbols"
 )
 
 func bootstrap_ca(fabric_id, admin_user uint64) {
