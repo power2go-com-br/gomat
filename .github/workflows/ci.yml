@@ -30,15 +30,16 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          # Only report issues in changed code (not pre-existing).
-          # PRs: diff against base branch. Pushes: diff against parent commit.
-          args: >-
-            --new-from-rev=${{ github.event_name == 'pull_request'
-                && github.event.pull_request.base.sha
-                || format('{0}~1', github.sha) }}
+      - name: Install golangci-lint v2
+        run: go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
+      - name: Run golangci-lint
+        # Only report issues in changed code (not pre-existing).
+        # PRs: diff against base branch. Pushes: diff against parent commit.
+        run: >-
+          golangci-lint run
+          --new-from-rev=${{ github.event_name == 'pull_request'
+              && github.event.pull_request.base.sha
+              || format('{0}~1', github.sha) }}
 
   test:
     name: Test
