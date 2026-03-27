@@ -5,7 +5,6 @@ import (
 	"crypto/aes"
 	"encoding/binary"
 	"fmt"
-	"math/rand"
 	"net"
 	"time"
 
@@ -73,7 +72,7 @@ func StartSecureChannel(remote_ip net.IP, remote_port, local_port int) (SecureCh
 	}
 	return SecureChannel{
 		Udp:     udp,
-		Counter: uint32(rand.Intn(0xffffffff)),
+		Counter: randomUint32(),
 	}, nil
 }
 
