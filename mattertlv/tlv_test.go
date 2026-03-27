@@ -89,7 +89,7 @@ func TestRec(t *testing.T) {
 
 	encoded := encoder.Bytes()
 	if hex.EncodeToString(encoded) != "1530010501020304053602153002050102030405260321000000181818" {
-		fmt.Printf(hex.EncodeToString(encoded))
+		fmt.Print(hex.EncodeToString(encoded))
 		t.Fatal("invalid encode")
 	}
 
