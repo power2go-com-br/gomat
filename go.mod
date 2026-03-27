@@ -1,4 +1,4 @@
-module github.com/tom-code/gomat
+module github.com/power2go-com-br/gomat
 
 go 1.21
 
