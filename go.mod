@@ -5,7 +5,6 @@ go 1.25.0
 require (
 	github.com/hashicorp/mdns v1.0.6
 	github.com/spf13/cobra v1.10.2
-	github.com/tom-code/gomat v0.0.0-20231210134906-5413b3e13054
 	golang.org/x/crypto v0.49.0
 )
 

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	randm "math/rand"
 
-	"github.com/tom-code/gomat/mattertlv"
+	"github.com/power2go-com-br/gomat/mattertlv"
 )
 
 type ProtocolId uint16
