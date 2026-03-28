@@ -23,7 +23,7 @@ func setupTestCertManager(t *testing.T) *FileCertManager {
 	if err := os.Chdir(tmpDir); err != nil {
 		t.Fatalf("Chdir: %v", err)
 	}
-	t.Cleanup(func() { os.Chdir(origDir) })
+	t.Cleanup(func() { _ = os.Chdir(origDir) })
 
 	if err := os.MkdirAll("pem", 0o755); err != nil {
 		t.Fatalf("MkdirAll pem: %v", err)
