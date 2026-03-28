@@ -21,6 +21,6 @@ func FuzzTLVDecode(f *testing.F) {
 
 	f.Fuzz(func(t *testing.T, data []byte) {
 		// Decode should never panic — errors are fine.
-		Decode(data)
+		_, _ = Decode(data)
 	})
 }
