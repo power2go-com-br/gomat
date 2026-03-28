@@ -348,30 +348,140 @@ func EncodeIMReadRequest(endpoint uint16, cluster uint32, attr uint32) []byte {
 	return buffer.Bytes()
 }
 
-// EncodeIMInvokeRequest encodes Interaction Model Read Request message
+// EncodeIMSubscribeRequest encodes an event-only SubscribeRequest with default intervals (10/50).
+// This is a convenience wrapper around EncodeIMSubscribeRequestEvents.
 func EncodeIMSubscribeRequest(endpoint uint16, cluster uint32, event uint32) []byte {
+	return EncodeIMSubscribeRequestEvents(endpoint, cluster, event, 10, 50)
+}
+
+// EncodeIMSubscribeRequestEvents encodes an event-only SubscribeRequest with configurable intervals.
+func EncodeIMSubscribeRequestEvents(endpoint uint16, cluster uint32, event uint32, minInterval, maxInterval uint16) []byte {
 	var tlv mattertlv.TLVBuffer
 	tlv.WriteAnonStruct()
-	tlv.WriteBool(0, false) // keep
-	tlv.WriteUInt16(1, 10)  // min interval
-	tlv.WriteUInt16(2, 50)  // max interval
-	tlv.WriteArray(4)
-	tlv.WriteAnonList()
-	tlv.WriteUInt16(1, endpoint)
-	tlv.WriteUInt32(2, cluster)
-	tlv.WriteUInt32(3, event)
-	tlv.WriteBool(4, true) // urgent
-	tlv.WriteStructEnd()
-	tlv.WriteStructEnd()
-	/*tlvx.WriteArray(5)
-		tlvx.WriteAnonStruct()
-				tlvx.WriteUInt(0, mattertlv.TYPE_UINT_1, uint64(100))
-				tlvx.WriteUInt(1, mattertlv.TYPE_UINT_1, uint64(0))
-		tlvx.WriteAnonStructEnd()
-	tlvx.WriteAnonStructEnd()*/
-	tlv.WriteBool(7, false) // fabric filtered
-	tlv.WriteUInt(0xff, mattertlv.TYPE_UINT_1, 10)
-	tlv.WriteStructEnd()
+	tlv.WriteBool(0, false)              // KeepSubscriptions
+	tlv.WriteUInt16(1, minInterval)      // MinIntervalFloorSeconds
+	tlv.WriteUInt16(2, maxInterval)      // MaxIntervalCeilingSeconds
+	tlv.WriteArray(4)                    // EventRequests
+	tlv.WriteAnonList()                  // EventPathIB
+	tlv.WriteUInt16(1, endpoint)         // Endpoint
+	tlv.WriteUInt32(2, cluster)          // Cluster
+	tlv.WriteUInt32(3, event)            // Event
+	tlv.WriteBool(4, true)               // IsUrgent
+	tlv.WriteStructEnd()                 // end EventPathIB
+	tlv.WriteStructEnd()                 // end EventRequests
+	tlv.WriteBool(7, false)              // IsFabricFiltered
+	tlv.WriteUInt(0xff, mattertlv.TYPE_UINT_1, 10) // InteractionModelRevision
+	tlv.WriteStructEnd()                 // end SubscribeRequestMessage
+
+	var buffer bytes.Buffer
+	prot := ProtocolMessageHeader{
+		exchangeFlags: 5,
+		Opcode:        INTERACTION_OPCODE_SUBSC_REQ,
+		ExchangeId:    0,
+		ProtocolId:    ProtocolIdInteraction,
+	}
+
+	prot.Encode(&buffer)
+	buffer.Write(tlv.Bytes())
+
+	return buffer.Bytes()
+}
+
+// SubscribeRequestOptions configures a SubscribeRequest with optional attribute and event paths.
+type SubscribeRequestOptions struct {
+	Endpoint    uint16
+	MinInterval uint16 // seconds; 0 = use default (10)
+	MaxInterval uint16 // seconds; 0 = use default (50)
+	// Attribute subscriptions (tag 3 — AttributePathIB)
+	AttrCluster uint32   // cluster for attribute paths
+	Attrs       []uint32 // attribute IDs (empty = no attribute subscription)
+	// Event subscriptions (tag 4 — EventPathIB)
+	EventCluster uint32   // cluster for event paths (can differ from AttrCluster)
+	Events       []uint32 // event IDs (empty = no event subscription)
+	EventUrgent  bool     // IsUrgent flag on event paths
+}
+
+// EncodeIMSubscribeRequestFull encodes a SubscribeRequest with both attribute and event paths.
+// When only Attrs or Events is populated, the other tag is omitted entirely.
+func EncodeIMSubscribeRequestFull(opts SubscribeRequestOptions) []byte {
+	minInterval := opts.MinInterval
+	if minInterval == 0 {
+		minInterval = 10
+	}
+	maxInterval := opts.MaxInterval
+	if maxInterval == 0 {
+		maxInterval = 50
+	}
+
+	var tlv mattertlv.TLVBuffer
+	tlv.WriteAnonStruct()
+	tlv.WriteBool(0, false)              // KeepSubscriptions
+	tlv.WriteUInt16(1, minInterval)      // MinIntervalFloorSeconds
+	tlv.WriteUInt16(2, maxInterval)      // MaxIntervalCeilingSeconds
+
+	if len(opts.Attrs) > 0 {
+		tlv.WriteArray(3) // AttributeRequests
+		for _, attr := range opts.Attrs {
+			tlv.WriteAnonList()              // AttributePathIB
+			tlv.WriteUInt16(2, opts.Endpoint) // Endpoint (tag 2)
+			tlv.WriteUInt32(3, opts.AttrCluster) // Cluster (tag 3)
+			tlv.WriteUInt32(4, attr)         // Attribute (tag 4)
+			tlv.WriteStructEnd()             // end AttributePathIB
+		}
+		tlv.WriteStructEnd() // end AttributeRequests
+	}
+
+	if len(opts.Events) > 0 {
+		tlv.WriteArray(4) // EventRequests
+		for _, event := range opts.Events {
+			tlv.WriteAnonList()              // EventPathIB
+			tlv.WriteUInt16(1, opts.Endpoint) // Endpoint (tag 1)
+			tlv.WriteUInt32(2, opts.EventCluster) // Cluster (tag 2)
+			tlv.WriteUInt32(3, event)        // Event (tag 3)
+			tlv.WriteBool(4, opts.EventUrgent) // IsUrgent (tag 4)
+			tlv.WriteStructEnd()             // end EventPathIB
+		}
+		tlv.WriteStructEnd() // end EventRequests
+	}
+
+	tlv.WriteBool(7, false)              // IsFabricFiltered
+	tlv.WriteUInt(0xff, mattertlv.TYPE_UINT_1, 10) // InteractionModelRevision
+	tlv.WriteStructEnd()                 // end SubscribeRequestMessage
+
+	var buffer bytes.Buffer
+	prot := ProtocolMessageHeader{
+		exchangeFlags: 5,
+		Opcode:        INTERACTION_OPCODE_SUBSC_REQ,
+		ExchangeId:    0,
+		ProtocolId:    ProtocolIdInteraction,
+	}
+
+	prot.Encode(&buffer)
+	buffer.Write(tlv.Bytes())
+
+	return buffer.Bytes()
+}
+
+// EncodeIMSubscribeRequestAttrs encodes an attribute-only SubscribeRequest.
+// attrs is a slice of attribute IDs to subscribe to on the given endpoint/cluster.
+func EncodeIMSubscribeRequestAttrs(endpoint uint16, cluster uint32, attrs []uint32, minInterval, maxInterval uint16) []byte {
+	var tlv mattertlv.TLVBuffer
+	tlv.WriteAnonStruct()
+	tlv.WriteBool(0, false)              // KeepSubscriptions
+	tlv.WriteUInt16(1, minInterval)      // MinIntervalFloorSeconds
+	tlv.WriteUInt16(2, maxInterval)      // MaxIntervalCeilingSeconds
+	tlv.WriteArray(3)                    // AttributeRequests
+	for _, attr := range attrs {
+		tlv.WriteAnonList()              // AttributePathIB
+		tlv.WriteUInt16(2, endpoint)     // Endpoint (tag 2, NOT tag 1)
+		tlv.WriteUInt32(3, cluster)      // Cluster  (tag 3, NOT tag 2)
+		tlv.WriteUInt32(4, attr)         // Attribute (tag 4, NOT tag 3)
+		tlv.WriteStructEnd()             // end AttributePathIB
+	}
+	tlv.WriteStructEnd()                 // end AttributeRequests
+	tlv.WriteBool(7, false)              // IsFabricFiltered
+	tlv.WriteUInt(0xff, mattertlv.TYPE_UINT_1, 10) // InteractionModelRevision
+	tlv.WriteStructEnd()                 // end SubscribeRequestMessage
 
 	var buffer bytes.Buffer
 	prot := ProtocolMessageHeader{
