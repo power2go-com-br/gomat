@@ -524,6 +524,7 @@ func EncodeIMStatusResponse(exchange_id uint16, iflag byte) []byte {
 	var tlv mattertlv.TLVBuffer
 	tlv.WriteAnonStruct()
 	tlv.WriteUInt8(0, 0)
+	tlv.WriteUInt(0xff, mattertlv.TYPE_UINT_1, 10) // InteractionModelRevision
 	tlv.WriteStructEnd()
 
 	var buffer bytes.Buffer
