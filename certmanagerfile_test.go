@@ -132,3 +132,30 @@ func TestNOCMatterTLVHasIsCAFalse(t *testing.T) {
 	}
 }
 
+// TestNOCSerialNumbersAreUnique generates two NOCs from the same CA
+// and verifies they have different serial numbers.
+func TestNOCSerialNumbersAreUnique(t *testing.T) {
+	cm := setupTestCertManager(t)
+
+	key1, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatalf("GenerateKey: %v", err)
+	}
+	key2, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatalf("GenerateKey: %v", err)
+	}
+
+	noc1, err := cm.SignCertificate(&key1.PublicKey, 1)
+	if err != nil {
+		t.Fatalf("SignCertificate(1): %v", err)
+	}
+	noc2, err := cm.SignCertificate(&key2.PublicKey, 2)
+	if err != nil {
+		t.Fatalf("SignCertificate(2): %v", err)
+	}
+
+	if noc1.SerialNumber.Cmp(noc2.SerialNumber) == 0 {
+		t.Errorf("NOC serial numbers should be unique, but both are %s", noc1.SerialNumber)
+	}
+}
