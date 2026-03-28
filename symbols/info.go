@@ -308,6 +308,19 @@ const ATTRIBUTE_ID_ElectricalEnergyMeasurement_PeriodicEnergyExportedStartTime =
 const ATTRIBUTE_ID_ElectricalEnergyMeasurement_PeriodicEnergyExportedEndTime = 9
 const ATTRIBUTE_ID_ElectricalEnergyMeasurement_PeriodicEnergyExported = 10
 const ATTRIBUTE_ID_ElectricalEnergyMeasurement_EphemeralEnergyImported = 11
+
+// Convenience aliases for energy monitoring use cases
+const ClusterElectricalPowerMeasurement = CLUSTER_ID_ElectricalPowerMeasurement   // 0x0090
+const ClusterElectricalEnergyMeasurement = CLUSTER_ID_ElectricalEnergyMeasurement // 0x0091
+
+const AttrActivePower = ATTRIBUTE_ID_ElectricalPowerMeasurement_ActivePower // 5
+const AttrVoltage = ATTRIBUTE_ID_ElectricalPowerMeasurement_Voltage         // 3
+const AttrActiveCurrent = ATTRIBUTE_ID_ElectricalPowerMeasurement_Current   // 4
+
+// Electrical Energy Measurement events (cluster 0x0091)
+const EventCumulativeEnergyMeasured = 0
+const EventPeriodicEnergyMeasured = 1
+
 const CLUSTER_ID_IlluminanceMeasurement = 0x400
 const ATTRIBUTE_ID_IlluminanceMeasurement_MeasuredValue = 0
 const ATTRIBUTE_ID_IlluminanceMeasurement_MinMeasuredValue = 1
