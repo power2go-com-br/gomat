@@ -365,3 +365,49 @@ func TestEncodeIMSubscribeRequestFull_EnergyMeterUseCase(t *testing.T) {
 		t.Error("IsFabricFiltered should be false")
 	}
 }
+
+// --- StatusResponse encoding ---
+
+func TestEncodeIMStatusResponse_HasInteractionModelRevision(t *testing.T) {
+	// matter.js rejects StatusResponse messages that are missing the
+	// interactionModelRevision field (tag 0xff). Verify it's present.
+	raw := EncodeIMStatusResponse(0x1234, 0)
+	tlv := decodeTLVPayload(t, raw)
+
+	// Verify status (tag 0) is present and zero (success)
+	status := tlv.GetItemWithTag(0)
+	if status == nil {
+		t.Fatal("tag 0 (Status) not found")
+	}
+	if status.GetInt() != 0 {
+		t.Errorf("Status = %d, want 0", status.GetInt())
+	}
+
+	// Verify InteractionModelRevision (tag 0xff) is present
+	imRev := tlv.GetItemWithTag(0xff)
+	if imRev == nil {
+		t.Fatal("tag 0xff (InteractionModelRevision) not found — matter.js requires this field")
+	}
+	if imRev.GetInt() < 1 {
+		t.Errorf("InteractionModelRevision = %d, want >= 1", imRev.GetInt())
+	}
+}
+
+func TestEncodeIMStatusResponse_ExchangeIdAndFlags(t *testing.T) {
+	raw := EncodeIMStatusResponse(0xABCD, 1)
+	if len(raw) < 6 {
+		t.Fatalf("message too short: %d bytes", len(raw))
+	}
+	// Protocol header: exchangeFlags(1) + opcode(1) + exchangeId(2) + protocolId(2)
+	wantFlags := byte(4 | 1)
+	if raw[0] != wantFlags {
+		t.Errorf("exchangeFlags = 0x%02x, want 0x%02x", raw[0], wantFlags)
+	}
+	if Opcode(raw[1]) != INTERACTION_OPCODE_STATUS_RSP {
+		t.Errorf("opcode = 0x%02x, want 0x%02x", raw[1], INTERACTION_OPCODE_STATUS_RSP)
+	}
+	gotExchangeID := uint16(raw[2]) | uint16(raw[3])<<8
+	if gotExchangeID != 0xABCD {
+		t.Errorf("exchangeID = 0x%04x, want 0xABCD", gotExchangeID)
+	}
+}
